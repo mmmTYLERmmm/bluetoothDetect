@@ -7,6 +7,7 @@
 #include <BLEDevice.h>
 #include <BLEScan.h>
 #include "HardwareSerial.h"
+#include <string>
 
 const int LED_BUILTIN = 2;
 const int CUTOFF = -50;
@@ -15,9 +16,12 @@ HardwareSerial serial(0);
 
 // MAC Address of responder - edit as required
 uint8_t broadcastAddress[] = {0xC0, 0x49, 0xEF, 0xE6, 0x13, 0x04}; // board B
+String deviceDetectorID = "AAAAAAAAAA";
+
 
 // Define a data structure
 typedef struct {
+    String detectorID;
     unsigned long time_string;
     char mac_address[18];  // 6 bytes in hexadecimal notation (2 characters per byte) plus 5 colons
     int8_t signal_strength;
@@ -83,6 +87,7 @@ void loop() {
 //    }
     if (rssi > CUTOFF) {
        // Format structured data
+      BTdevice.detectorID = deviceDetectorID;
       BTdevice.time_string = millis();
       strcpy(BTdevice.mac_address, device.getAddress().toString().c_str());
       BTdevice.signal_strength = rssi;

@@ -10,9 +10,11 @@
 // Include Libraries
 #include <esp_now.h>
 #include <WiFi.h>
+#include <string>
 
 // Define a data structure
 typedef struct {
+    String detectorID;
     unsigned long time_string;
     char mac_address[18];  // 6 bytes in hexadecimal notation (2 characters per byte) plus 5 colons
     int8_t signal_strength;
@@ -25,13 +27,17 @@ device_info_t BTdevice;
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&BTdevice, incomingData, sizeof(BTdevice));
-  Serial.println("Data received: ");
+  
+  Serial.println("######DATA RECEIVED #######");
+  Serial.print("DeviceID: ");
+  Serial.println(BTdevice.detectorID); 
   Serial.print("Time: ");
   Serial.println(BTdevice.time_string);  
   Serial.print("Mac Address: ");
   Serial.println(BTdevice.mac_address);
   Serial.print("Signal Strength: ");
   Serial.println(BTdevice.signal_strength);
+  Serial.println("");
 }
 
 void setup() {
