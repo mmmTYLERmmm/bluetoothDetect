@@ -15,6 +15,7 @@
 // Define a data structure
 typedef struct {
     String detectorID;
+    unsigned long time_string;
     char mac_address[18];  // 6 bytes in hexadecimal notation (2 characters per byte) plus 5 colons
     int8_t signal_strength;
 } device_info_t;
@@ -30,6 +31,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.println("######DATA RECEIVED #######");
   Serial.print("DeviceID: ");
   Serial.println(BTdevice.detectorID); 
+//  Serial.print("Time: ");   /we will bring this back to display real-time 
+//  Serial.println(BTdevice.time_string);  
   Serial.print("Mac Address: ");
   Serial.println(BTdevice.mac_address);
   Serial.print("Signal Strength: ");

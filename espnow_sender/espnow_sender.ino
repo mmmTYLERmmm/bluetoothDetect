@@ -22,6 +22,7 @@ String deviceDetectorID = "AAAAAAAAAA";
 // Define a data structure
 typedef struct {
     String detectorID;
+    unsigned long time_string;
     char mac_address[18];  // 6 bytes in hexadecimal notation (2 characters per byte) plus 5 colons
     int8_t signal_strength;
 } device_info_t;
@@ -87,6 +88,7 @@ void loop() {
     if (rssi > CUTOFF) {
        // Format structured data
       BTdevice.detectorID = deviceDetectorID;
+      BTdevice.time_string = millis();
       strcpy(BTdevice.mac_address, device.getAddress().toString().c_str());
       BTdevice.signal_strength = rssi;
 
