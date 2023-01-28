@@ -11,6 +11,16 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include <string>
+#include "time.h"
+
+// Contants used to access network time
+const char* ssid     = "WIFI-SSID";
+const char* password = "WIFI-PASSWORD";
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = -21600;
+const int   daylightOffset_sec = 3600;
+const int   maximumAttempts = 25;
+bool        timeAcquired = false;
 
 // Define a data structure
 typedef struct {
@@ -23,16 +33,19 @@ typedef struct {
 // Create a structured object
 device_info_t BTdevice;
 
-
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&BTdevice, incomingData, sizeof(BTdevice));
   
   Serial.println("######DATA RECEIVED #######");
-  Serial.print("DeviceID: ");
+  if (timeAcquired) {
+    Serial.print("Received Time: ");  
+    printLocalTime();
+  }
+  Serial.print("Device ID: ");
   Serial.println(BTdevice.detectorID); 
-//  Serial.print("Time: ");   /we will bring this back to display real-time 
-//  Serial.println(BTdevice.time_string);  
+  Serial.print("Device Time: "); 
+  Serial.println(BTdevice.time_string);
   Serial.print("Mac Address: ");
   Serial.println(BTdevice.mac_address);
   Serial.print("Signal Strength: ");
@@ -44,6 +57,26 @@ void setup() {
   // Set up Serial Monitor
   Serial.begin(115200);
   
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  int attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount<maximumAttempts) {
+    attemptCount = attemptCount+1;
+    delay(500);
+    Serial.print(">");
+  }
+  if (attemptCount < maximumAttempts){
+    timeAcquired = true;
+  }
+  
+  // Init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  printLocalTime();
+
+  //disconnect WiFi as it's no longer needed
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+
   // Set ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -58,5 +91,14 @@ void setup() {
 }
  
 void loop() {
+  
+}
 
+void printLocalTime(){
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
